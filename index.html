@@ -233,9 +233,19 @@
             font-size: clamp(0.6rem, 0.7vw, 0.75rem);
             color: rgba(255, 255, 255, 0.25);
             display: none;
+            align-items: center;
+            gap: 6px;
         }
         .file-upload-row .file-info.visible {
-            display: inline;
+            display: inline-flex;
+        }
+        .file-upload-row .file-info .preview-thumb {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: #0f1117;
         }
         .file-upload-row .clear-file {
             background: none;
@@ -260,6 +270,14 @@
             display: none;
         }
         .file-upload-row .size-warning.visible {
+            display: inline;
+        }
+        .file-upload-row .compress-info {
+            font-size: clamp(0.5rem, 0.6vw, 0.65rem);
+            color: #34d399;
+            display: none;
+        }
+        .file-upload-row .compress-info.visible {
             display: inline;
         }
 
@@ -460,6 +478,7 @@
             .qr-actions button { font-size: 0.6rem; padding: 0.3rem 0.8rem; min-height: 32px; }
             .toast { font-size: 0.65rem; padding: 0.4rem 1rem; white-space: normal; max-width: 92vw; text-align: center; }
             .file-upload-row .upload-btn { font-size: 0.6rem; padding: 0.3rem 0.6rem; min-height: 32px; }
+            .file-upload-row .file-info .preview-thumb { width: 24px; height: 24px; }
         }
 
         @media (max-width: 360px) {
@@ -544,10 +563,14 @@
                 <!-- File upload row – visible only for PDF & Menu -->
                 <div class="file-upload-row" id="fileUploadRow">
                     <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp" />
-                    <button class="upload-btn" id="uploadBtn"><i class="fas fa-upload"></i> <span id="uploadBtnText">Upload PDF</span></button>
-                    <span class="file-info" id="fileInfo">📄 <span id="fileName"></span> (<span id="fileSize"></span>)</span>
+                    <button class="upload-btn" id="uploadBtn"><i class="fas fa-upload"></i> <span id="uploadBtnText">Upload Image</span></button>
+                    <span class="file-info" id="fileInfo">
+                        <img class="preview-thumb" id="filePreview" src="" alt="preview" />
+                        <span id="fileName"></span> (<span id="fileSize"></span>)
+                    </span>
+                    <span class="compress-info" id="compressInfo">📦 Compressed</span>
                     <button class="clear-file" id="clearFileBtn">✕</button>
-                    <span class="size-warning" id="sizeWarning">⚠️ File too large for QR code</span>
+                    <span class="size-warning" id="sizeWarning">⚠️ File too large for QR</span>
                 </div>
 
                 <button class="btn-generate" id="generateBtn">
@@ -602,10 +625,12 @@
             const uploadBtn = document.getElementById('uploadBtn');
             const uploadBtnText = document.getElementById('uploadBtnText');
             const fileInfo = document.getElementById('fileInfo');
+            const filePreview = document.getElementById('filePreview');
             const fileName = document.getElementById('fileName');
             const fileSize = document.getElementById('fileSize');
             const clearFileBtn = document.getElementById('clearFileBtn');
             const sizeWarning = document.getElementById('sizeWarning');
+            const compressInfo = document.getElementById('compressInfo');
 
             let toastTimer = null;
             let uploadedFileBase64 = null;
@@ -663,8 +688,8 @@
                 const fileTypes = ['pdf', 'menu'];
                 if (fileTypes.includes(type)) {
                     fileUploadRow.classList.add('visible');
-                    uploadBtnText.textContent = type === 'pdf' ? 'Upload PDF' : 'Upload Menu';
-                    fileInput.accept = type === 'pdf' ? '.pdf' : '.pdf,.jpg,.jpeg,.png,.webp';
+                    uploadBtnText.textContent = type === 'pdf' ? 'Upload PDF' : 'Upload Image';
+                    fileInput.accept = type === 'pdf' ? '.pdf' : '.jpg,.jpeg,.png,.webp';
                 } else {
                     fileUploadRow.classList.remove('visible');
                 }
@@ -677,52 +702,117 @@
                 fileInfo.classList.remove('visible');
                 clearFileBtn.classList.remove('visible');
                 sizeWarning.classList.remove('visible');
+                compressInfo.classList.remove('visible');
                 fileName.textContent = '';
                 fileSize.textContent = '';
+                filePreview.src = '';
             }
 
-            // ─── Handle file upload ───
+            // ─── Compress & handle image upload ───
+            function handleImageUpload(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Resize image
+                        const MAX_SIZE = 200;
+                        let width = img.width;
+                        let height = img.height;
+                        let quality = 0.6;
+
+                        if (width > MAX_SIZE || height > MAX_SIZE) {
+                            const ratio = Math.min(MAX_SIZE / width, MAX_SIZE / height);
+                            width = Math.round(width * ratio);
+                            height = Math.round(height * ratio);
+                            compressInfo.classList.add('visible');
+                        } else {
+                            compressInfo.classList.remove('visible');
+                        }
+
+                        // Draw compressed image on canvas
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Export as JPEG with quality
+                        let dataUri = canvas.toDataURL('image/jpeg', quality);
+
+                        // If still too large, try lower quality
+                        if (dataUri.length > 4000) {
+                            quality = 0.4;
+                            dataUri = canvas.toDataURL('image/jpeg', quality);
+                        }
+                        if (dataUri.length > 5000) {
+                            quality = 0.2;
+                            dataUri = canvas.toDataURL('image/jpeg', quality);
+                        }
+
+                        // Show file info with preview
+                        fileName.textContent = file.name;
+                        const sizeKB = (file.size / 1024).toFixed(1);
+                        fileSize.textContent = sizeKB + ' KB';
+                        filePreview.src = dataUri;
+                        fileInfo.classList.add('visible');
+                        clearFileBtn.classList.add('visible');
+
+                        // Check final size
+                        const base64Len = dataUri.split(',')[1].length;
+                        if (base64Len > 3000) {
+                            sizeWarning.classList.add('visible');
+                            showToast('Image compressed but still too large. Try a smaller image.', 'fa-exclamation-triangle', '#fbbf24');
+                            uploadedFileBase64 = null;
+                            return;
+                        }
+
+                        sizeWarning.classList.remove('visible');
+                        uploadedFileBase64 = dataUri;
+                        dataInput.value = dataUri;
+                        showToast('Image compressed & ready! Generate QR to encode.', 'fa-check-circle', '#34d399');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // ─── Handle file upload (PDF or Image) ───
             function handleFileUpload(file) {
                 if (!file) return;
 
-                // Check file size (we want to warn if too large)
-                const maxBase64Chars = 3000; // ~2KB of binary data
-                const reader = new FileReader();
+                const type = dataType.value;
 
-                reader.onload = function(e) {
-                    const base64 = e.target.result.split(',')[1] || e.target.result;
-                    const dataUri = e.target.result;
+                if (type === 'pdf') {
+                    // For PDF: try to read as base64, check size
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const base64 = e.target.result.split(',')[1] || e.target.result;
+                        const dataUri = e.target.result;
 
-                    // Show file info
-                    fileName.textContent = file.name;
-                    const sizeKB = (file.size / 1024).toFixed(1);
-                    fileSize.textContent = sizeKB + ' KB';
-                    fileInfo.classList.add('visible');
-                    clearFileBtn.classList.add('visible');
+                        fileName.textContent = file.name;
+                        const sizeKB = (file.size / 1024).toFixed(1);
+                        fileSize.textContent = sizeKB + ' KB';
+                        fileInfo.classList.add('visible');
+                        clearFileBtn.classList.add('visible');
+                        filePreview.src = ''; // No preview for PDF
 
-                    // Check size
-                    if (base64.length > maxBase64Chars) {
-                        sizeWarning.classList.add('visible');
-                        showToast('File too large for QR code. Max ~2KB. Use a URL instead.', 'fa-exclamation-triangle', '#fbbf24');
-                        uploadedFileBase64 = null;
-                        return;
-                    }
+                        if (base64.length > 3000) {
+                            sizeWarning.classList.add('visible');
+                            showToast('PDF too large for QR. Use a URL instead.', 'fa-exclamation-triangle', '#fbbf24');
+                            uploadedFileBase64 = null;
+                            return;
+                        }
 
-                    sizeWarning.classList.remove('visible');
-                    uploadedFileBase64 = dataUri;
-
-                    // Auto-fill the textarea
-                    const type = dataType.value;
-                    if (type === 'pdf') {
+                        sizeWarning.classList.remove('visible');
+                        uploadedFileBase64 = dataUri;
                         dataInput.value = dataUri;
-                    } else if (type === 'menu') {
-                        dataInput.value = dataUri;
-                    }
-
-                    showToast('File ready! Click Generate to create QR code.', 'fa-check-circle', '#34d399');
-                };
-
-                reader.readAsDataURL(file);
+                        showToast('PDF ready! Generate QR to encode.', 'fa-check-circle', '#34d399');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // For menu / image
+                    handleImageUpload(file);
+                }
             }
 
             // ─── Build QR data ───
@@ -761,7 +851,6 @@
                             v.startsWith('data:application/')) {
                             return v;
                         }
-                        // Otherwise treat as URL
                         return v;
 
                     case 'wifi': {
