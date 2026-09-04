@@ -570,7 +570,7 @@
                     </span>
                     <span class="compress-info" id="compressInfo">📦 Compressed</span>
                     <button class="clear-file" id="clearFileBtn">✕</button>
-                    <span class="size-warning" id="sizeWarning">⚠️ File too large for QR</span>
+                    <span class="size-warning" id="sizeWarning">⚠️ Too large</span>
                 </div>
 
                 <button class="btn-generate" id="generateBtn">
@@ -669,7 +669,7 @@
                 review:    { label: 'Review Request URL', placeholder: 'https://example.com/review' }
             };
 
-            // ─── Update fields based on type ───
+            // ─── Update fields ───
             function updateFields() {
                 const type = dataType.value;
                 const cfg = typeConfigs[type];
@@ -684,7 +684,6 @@
                 resetDisplay();
                 resetFileUpload();
 
-                // Show file upload for PDF and Menu
                 const fileTypes = ['pdf', 'menu'];
                 if (fileTypes.includes(type)) {
                     fileUploadRow.classList.add('visible');
@@ -695,7 +694,6 @@
                 }
             }
 
-            // ─── Reset file upload state ───
             function resetFileUpload() {
                 fileInput.value = '';
                 uploadedFileBase64 = null;
@@ -708,110 +706,108 @@
                 filePreview.src = '';
             }
 
-            // ─── Compress & handle image upload ───
-            function handleImageUpload(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        // Resize image
-                        const MAX_SIZE = 200;
-                        let width = img.width;
-                        let height = img.height;
-                        let quality = 0.6;
+            // ─── Compress image ───
+            function compressImage(file, maxSize = 200, quality = 0.6) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            let width = img.width;
+                            let height = img.height;
+                            let q = quality;
+                            let canvas = document.createElement('canvas');
+                            if (width > maxSize || height > maxSize) {
+                                const ratio = Math.min(maxSize / width, maxSize / height);
+                                width = Math.round(width * ratio);
+                                height = Math.round(height * ratio);
+                                compressInfo.classList.add('visible');
+                            } else {
+                                compressInfo.classList.remove('visible');
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
 
-                        if (width > MAX_SIZE || height > MAX_SIZE) {
-                            const ratio = Math.min(MAX_SIZE / width, MAX_SIZE / height);
-                            width = Math.round(width * ratio);
-                            height = Math.round(height * ratio);
-                            compressInfo.classList.add('visible');
-                        } else {
-                            compressInfo.classList.remove('visible');
-                        }
-
-                        // Draw compressed image on canvas
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Export as JPEG with quality
-                        let dataUri = canvas.toDataURL('image/jpeg', quality);
-
-                        // If still too large, try lower quality
-                        if (dataUri.length > 4000) {
-                            quality = 0.4;
-                            dataUri = canvas.toDataURL('image/jpeg', quality);
-                        }
-                        if (dataUri.length > 5000) {
-                            quality = 0.2;
-                            dataUri = canvas.toDataURL('image/jpeg', quality);
-                        }
-
-                        // Show file info with preview
-                        fileName.textContent = file.name;
-                        const sizeKB = (file.size / 1024).toFixed(1);
-                        fileSize.textContent = sizeKB + ' KB';
-                        filePreview.src = dataUri;
-                        fileInfo.classList.add('visible');
-                        clearFileBtn.classList.add('visible');
-
-                        // Check final size
-                        const base64Len = dataUri.split(',')[1].length;
-                        if (base64Len > 3000) {
-                            sizeWarning.classList.add('visible');
-                            showToast('Image compressed but still too large. Try a smaller image.', 'fa-exclamation-triangle', '#fbbf24');
-                            uploadedFileBase64 = null;
-                            return;
-                        }
-
-                        sizeWarning.classList.remove('visible');
-                        uploadedFileBase64 = dataUri;
-                        dataInput.value = dataUri;
-                        showToast('Image compressed & ready! Generate QR to encode.', 'fa-check-circle', '#34d399');
+                            let dataUri = canvas.toDataURL('image/jpeg', q);
+                            // If still too large, reduce quality further
+                            if (dataUri.length > 3500) {
+                                q = 0.4;
+                                dataUri = canvas.toDataURL('image/jpeg', q);
+                            }
+                            if (dataUri.length > 4000) {
+                                q = 0.2;
+                                dataUri = canvas.toDataURL('image/jpeg', q);
+                            }
+                            if (dataUri.length > 4500) {
+                                q = 0.1;
+                                dataUri = canvas.toDataURL('image/jpeg', q);
+                            }
+                            resolve(dataUri);
+                        };
+                        img.onerror = reject;
+                        img.src = e.target.result;
                     };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
             }
 
-            // ─── Handle file upload (PDF or Image) ───
-            function handleFileUpload(file) {
+            // ─── Handle file upload ───
+            async function handleFileUpload(file) {
                 if (!file) return;
-
                 const type = dataType.value;
 
                 if (type === 'pdf') {
-                    // For PDF: try to read as base64, check size
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        const base64 = e.target.result.split(',')[1] || e.target.result;
                         const dataUri = e.target.result;
-
+                        const base64Len = dataUri.split(',')[1].length;
                         fileName.textContent = file.name;
-                        const sizeKB = (file.size / 1024).toFixed(1);
-                        fileSize.textContent = sizeKB + ' KB';
+                        fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
                         fileInfo.classList.add('visible');
                         clearFileBtn.classList.add('visible');
-                        filePreview.src = ''; // No preview for PDF
+                        filePreview.src = '';
 
-                        if (base64.length > 3000) {
+                        if (base64Len > 3000) {
                             sizeWarning.classList.add('visible');
-                            showToast('PDF too large for QR. Use a URL instead.', 'fa-exclamation-triangle', '#fbbf24');
+                            showToast('PDF too large. Use a URL instead.', 'fa-exclamation-triangle', '#fbbf24');
                             uploadedFileBase64 = null;
                             return;
                         }
-
                         sizeWarning.classList.remove('visible');
                         uploadedFileBase64 = dataUri;
                         dataInput.value = dataUri;
-                        showToast('PDF ready! Generate QR to encode.', 'fa-check-circle', '#34d399');
+                        showToast('PDF loaded! Generate QR to encode.', 'fa-check-circle', '#34d399');
                     };
                     reader.readAsDataURL(file);
-                } else {
-                    // For menu / image
-                    handleImageUpload(file);
+                    return;
+                }
+
+                // Image (menu)
+                try {
+                    const compressed = await compressImage(file);
+                    const base64Len = compressed.split(',')[1].length;
+                    fileName.textContent = file.name;
+                    fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+                    filePreview.src = compressed;
+                    fileInfo.classList.add('visible');
+                    clearFileBtn.classList.add('visible');
+                    compressInfo.classList.add('visible');
+
+                    if (base64Len > 3500) {
+                        sizeWarning.classList.add('visible');
+                        showToast('Image still too large. Try a smaller image or use a URL.', 'fa-exclamation-triangle', '#fbbf24');
+                        uploadedFileBase64 = null;
+                        return;
+                    }
+                    sizeWarning.classList.remove('visible');
+                    uploadedFileBase64 = compressed;
+                    dataInput.value = compressed;
+                    showToast('Image compressed & ready!', 'fa-check-circle', '#34d399');
+                } catch (err) {
+                    showToast('Failed to process image.', 'fa-times-circle', '#f87171');
                 }
             }
 
@@ -845,8 +841,7 @@
 
                     case 'pdf':
                     case 'menu':
-                        // If it's a data URI (uploaded file), use it directly
-                        if (v.startsWith('data:application/pdf;base64,') || 
+                        if (v.startsWith('data:application/pdf;base64,') ||
                             v.startsWith('data:image/') ||
                             v.startsWith('data:application/')) {
                             return v;
@@ -898,7 +893,7 @@
                 }
             }
 
-            // ─── Generate QR ───
+            // ─── Generate QR (with error handling) ───
             function generateQR() {
                 const type = dataType.value;
                 const raw = dataInput.value;
@@ -908,21 +903,31 @@
                     return;
                 }
 
-                qrContainer.innerHTML = '';
-                new QRCode(qrContainer, {
-                    text: data,
-                    width: 200,
-                    height: 200,
-                    colorDark: '#0b0e14',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+                // Check data length
+                if (data.length > 3000) {
+                    showToast('Data too long for QR. Use a shorter text or URL.', 'fa-exclamation-circle', '#f87171');
+                    return;
+                }
 
-                placeholder.style.display = 'none';
-                qrBox.classList.add('visible');
-                qrActions.classList.add('visible');
-                qrPanel.classList.add('has-qr');
-                showToast('QR generated successfully!');
+                try {
+                    qrContainer.innerHTML = '';
+                    new QRCode(qrContainer, {
+                        text: data,
+                        width: 200,
+                        height: 200,
+                        colorDark: '#0b0e14',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+
+                    placeholder.style.display = 'none';
+                    qrBox.classList.add('visible');
+                    qrActions.classList.add('visible');
+                    qrPanel.classList.add('has-qr');
+                    showToast('QR generated successfully!');
+                } catch (err) {
+                    showToast('QR generation failed: ' + err.message, 'fa-times-circle', '#f87171');
+                }
             }
 
             function resetDisplay() {
@@ -961,7 +966,6 @@
             downloadBtn.addEventListener('click', downloadPNG);
             resetBtn.addEventListener('click', resetAll);
 
-            // File upload
             uploadBtn.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', function(e) {
                 if (this.files && this.files.length > 0) {
