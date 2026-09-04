@@ -4,9 +4,38 @@
     <meta name="google-site-verification" content="P-HC5uzJer3gjmhGComDOiHQofyUh5vg89FNtlyQN1I" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QR Forge – Premium QR Generator</title>
+    
+    <!-- ====== EXPANDED SEO TITLE ====== -->
+    <title>Free QR Code Generator – Create QR for URL, WiFi, vCard, Text, SMS & Phone</title>
+    
+    <!-- ====== EXPANDED META DESCRIPTION ====== -->
+    <meta name="description" content="Generate free QR codes for URL, WiFi, vCard, text, SMS, and phone numbers. Instant download in high-quality PNG. No sign-up, no uploads, fully private and works offline." />
+    
+    <!-- ====== KEYWORDS (Helps Bing/Yahoo) ====== -->
+    <meta name="keywords" content="qr code generator, free qr generator, wifi qr, vcard qr, convert to qr, qr creator, url to qr, text to qr, sms qr, phone qr, download qr, private qr, offline qr generator, qr maker" />
+    
+    <!-- ====== TELL SEARCH ENGINES TO INDEX YOUR SITE ====== -->
+    <meta name="robots" content="index, follow" />
+    
+    <!-- ====== CANONICAL URL (Prevents Duplicate Content Issues) ====== -->
+    <link rel="canonical" href="https://ghost680-coder.github.io/qr-forge/" />
+    
+    <!-- ====== SOCIAL MEDIA PREVIEW (Open Graph) ====== -->
+    <meta property="og:title" content="Free QR Code Generator – Create QR for URL, WiFi, vCard & More" />
+    <meta property="og:description" content="Instantly generate and download QR codes. No sign-up, no uploads, 100% free." />
+    <meta property="og:url" content="https://ghost680-coder.github.io/qr-forge/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://ghost680-coder.github.io/qr-forge/og-image.png" />
+    
+    <!-- ====== TWITTER CARD ====== -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Free QR Code Generator – Create QR for URL, WiFi, vCard & More" />
+    <meta name="twitter:description" content="Instantly generate and download QR codes. No sign-up, no uploads, 100% free." />
+    
+    <!-- ====== QRCODE.JS ====== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
     </script>
+    
     <style>
         /* ─── Reset ─── */
         * {
@@ -390,9 +419,12 @@
     </style>
 </head>
 <body>
+    <!-- ====== HIDDEN H1 FOR SEO (Visible to Search Engines, Not Users) ====== -->
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">
+        Free QR Code Generator – Convert URL, WiFi, vCard, Text, SMS & Phone to QR
+    </h1>
 
     <div class="card">
-        <!-- Header -->
         <div class="header">
             <div class="icon-wrap"><i class="fas fa-qrcode"></i></div>
             <div class="title-group">
@@ -401,9 +433,7 @@
             </div>
         </div>
 
-        <!-- Grid -->
         <div class="grid">
-            <!-- Left -->
             <div>
                 <div class="input-group">
                     <label for="dataType">Data Type</label>
@@ -429,7 +459,6 @@
                 </button>
             </div>
 
-            <!-- Right: QR Preview -->
             <div class="qr-panel" id="qrPanel">
                 <div class="placeholder" id="placeholder">
                     <i class="fas fa-qrcode"></i>
@@ -450,15 +479,12 @@
         <div class="footer">🔒 All processing is local · <span>No uploads, no tracking</span></div>
     </div>
 
-    <!-- Toast -->
     <div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Done!</span></div>
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <script>
         (function() {
-            // ── DOM ──
             const dataType = document.getElementById('dataType');
             const dataInput = document.getElementById('dataInput');
             const inputLabel = document.getElementById('inputLabel');
@@ -482,7 +508,6 @@
                 toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
             }
 
-            // ── Type configs ──
             const typeConfigs = {
                 url: { label: 'Enter URL', placeholder: 'https://example.com' },
                 text: { label: 'Enter Text', placeholder: 'Type anything...' },
@@ -505,26 +530,18 @@
             dataType.addEventListener('change', updateFields);
             updateFields();
 
-            // ── Build QR data ──
             function buildQRData(type, raw) {
                 const v = raw.trim();
                 if (!v) return null;
                 switch (type) {
-                    case 'url':
-                        return v;
-                    case 'text':
-                        return v;
-                    case 'email':
-                        return `mailto:${v}`;
-                    case 'phone':
-                        return `tel:${v}`;
-                    case 'sms':
-                        return `sms:${v}`;
+                    case 'url': return v;
+                    case 'text': return v;
+                    case 'email': return `mailto:${v}`;
+                    case 'phone': return `tel:${v}`;
+                    case 'sms': return `sms:${v}`;
                     case 'wifi': {
                         const parts = v.split(',').map(p => p.trim());
-                        let ssid = '',
-                            password = '',
-                            type2 = 'WPA';
+                        let ssid = '', password = '', type2 = 'WPA';
                         for (const p of parts) {
                             const lower = p.toLowerCase();
                             if (lower.startsWith('ssid:')) ssid = p.substring(5);
@@ -536,9 +553,7 @@
                     }
                     case 'vcard': {
                         const parts = v.split(',').map(p => p.trim());
-                        let name = '',
-                            phone = '',
-                            email = '';
+                        let name = '', phone = '', email = '';
                         for (const p of parts) {
                             const lower = p.toLowerCase();
                             if (lower.startsWith('name:')) name = p.substring(5);
@@ -548,14 +563,11 @@
                         if (!name) return null;
                         return `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phone}\nEMAIL:${email}\nEND:VCARD`;
                     }
-                    case 'location':
-                        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v)}`;
-                    default:
-                        return v;
+                    case 'location': return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v)}`;
+                    default: return v;
                 }
             }
 
-            // ── Generate ──
             function generateQR() {
                 const type = dataType.value;
                 const raw = dataInput.value;
@@ -582,7 +594,6 @@
                 showToast('QR generated successfully!');
             }
 
-            // ── Reset ──
             function resetDisplay() {
                 placeholder.style.display = 'block';
                 qrBox.classList.remove('visible');
@@ -597,7 +608,6 @@
                 showToast('Reset complete.');
             }
 
-            // ── Download ──
             function downloadPNG() {
                 const canvas = qrContainer.querySelector('canvas');
                 if (!canvas) {
@@ -611,7 +621,6 @@
                 showToast('PNG downloaded!');
             }
 
-            // ── Events ──
             generateBtn.addEventListener('click', generateQR);
             downloadBtn.addEventListener('click', downloadPNG);
             resetBtn.addEventListener('click', resetAll);
@@ -623,7 +632,6 @@
                 }
             });
 
-            // ── Init ──
             resetDisplay();
             showToast('Welcome to QR Forge');
         })();
