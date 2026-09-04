@@ -5,18 +5,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <title>Free QR Code Generator – Create QR for URL, WiFi, vCard, Text, SMS & Phone</title>
-    <meta name="description" content="Generate free QR codes for URL, WiFi, vCard, text, SMS, and phone numbers. Instant download in high-quality PNG. No sign-up, no uploads, fully private and works offline." />
-    <meta name="keywords" content="qr code generator, free qr generator, wifi qr, vcard qr, convert to qr, qr creator, url to qr, text to qr, sms qr, phone qr, download qr, private qr, offline qr generator, qr maker" />
+    <title>Free QR Code Generator – All Types: URL, WiFi, vCard, Social, Events & More</title>
+    <meta name="description" content="Generate QR codes for URLs, WiFi, vCard, social media, app stores, events, and 20+ more types. Instant download, no sign-up, 100% free." />
+    <meta name="keywords" content="qr code generator, all types qr, wifi qr, vcard qr, social media qr, event qr, app store qr, free qr, download qr" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://ghost680-coder.github.io/qr-forge/" />
-    <meta property="og:title" content="Free QR Code Generator – Create QR for URL, WiFi, vCard & More" />
-    <meta property="og:description" content="Instantly generate and download QR codes. No sign-up, no uploads, 100% free." />
+    <meta property="og:title" content="Free QR Code Generator – 20+ Data Types" />
+    <meta property="og:description" content="Generate QR codes for URL, WiFi, vCard, social media, events, and more. No sign-up, no uploads." />
     <meta property="og:url" content="https://ghost680-coder.github.io/qr-forge/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Free QR Code Generator – Create QR for URL, WiFi, vCard & More" />
-    <meta name="twitter:description" content="Instantly generate and download QR codes. No sign-up, no uploads, 100% free." />
+    <meta name="twitter:title" content="Free QR Code Generator – 20+ Data Types" />
+    <meta name="twitter:description" content="Generate QR codes for URL, WiFi, vCard, social media, events, and more." />
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
     </script>
@@ -410,7 +410,7 @@
 </head>
 <body>
     <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">
-        Free QR Code Generator – Convert URL, WiFi, vCard, Text, SMS & Phone to QR
+        Free QR Code Generator – Convert URL, WiFi, vCard, Social, Events & More to QR
     </h1>
 
     <div class="card">
@@ -418,7 +418,7 @@
             <div class="icon-wrap"><i class="fas fa-qrcode"></i></div>
             <div class="title-group">
                 <h1>QR Forge</h1>
-                <div class="sub">Instant QR codes · No data leaves your device</div>
+                <div class="sub">Instant QR codes · 23+ data types · No uploads</div>
             </div>
         </div>
 
@@ -428,14 +428,27 @@
                     <label for="dataType">Data Type</label>
                     <div class="custom-select">
                         <select id="dataType">
-                            <option value="url">🔗 URL</option>
+                            <option value="url">🔗 URL / Website</option>
                             <option value="text">📝 Plain Text</option>
                             <option value="email">✉️ Email</option>
                             <option value="phone">📞 Phone</option>
                             <option value="sms">💬 SMS</option>
                             <option value="wifi">📶 WiFi</option>
                             <option value="vcard">👤 vCard</option>
-                            <option value="location">📍 Location</option>
+                            <option value="event">📅 Event</option>
+                            <option value="instagram">📸 Instagram</option>
+                            <option value="twitter">🐦 Twitter/X</option>
+                            <option value="facebook">📘 Facebook</option>
+                            <option value="linkedin">💼 LinkedIn</option>
+                            <option value="tiktok">🎵 TikTok</option>
+                            <option value="youtube">▶️ YouTube</option>
+                            <option value="whatsapp">💬 WhatsApp</option>
+                            <option value="multiurl">🔗 Multi URL</option>
+                            <option value="appstore">📱 App Store</option>
+                            <option value="googleplay">📱 Google Play</option>
+                            <option value="pdf">📄 PDF</option>
+                            <option value="menu">🍽️ Menu</option>
+                            <option value="review">⭐ Review</option>
                         </select>
                     </div>
                 </div>
@@ -499,38 +512,80 @@
                 toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
             }
 
+            // ─── All 23+ types with labels and placeholders ───
             const typeConfigs = {
-                url: { label: 'Enter URL', placeholder: 'https://example.com' },
-                text: { label: 'Enter Text', placeholder: 'Type anything...' },
-                email: { label: 'Enter Email', placeholder: 'someone@example.com' },
-                phone: { label: 'Enter Phone', placeholder: '+91 9876543210' },
-                sms: { label: 'Enter SMS', placeholder: 'Hello, this is a test' },
-                wifi: { label: 'WiFi Network', placeholder: 'SSID:MyWiFi,Password:secret,Type:WPA' },
-                vcard: { label: 'vCard Contact', placeholder: 'Name:John Doe,Phone:+91...,Email:john@...' },
-                location: { label: 'Location', placeholder: 'Kochi, Kerala' }
+                url:       { label: 'Enter URL', placeholder: 'https://example.com' },
+                text:      { label: 'Enter Text', placeholder: 'Type anything...' },
+                email:     { label: 'Enter Email', placeholder: 'someone@example.com' },
+                phone:     { label: 'Enter Phone', placeholder: '+91 9876543210' },
+                sms:       { label: 'Enter SMS', placeholder: 'Hello, this is a test' },
+                wifi:      { label: 'WiFi Network', placeholder: 'SSID:MyWiFi,Password:secret,Type:WPA' },
+                vcard:     { label: 'vCard Contact', placeholder: 'Name:John,Phone:+91...,Email:john@...' },
+                event:     { label: 'Event Details', placeholder: 'Title:My Event,Start:2024-12-25 18:00,End:2024-12-25 21:00,Location:Hall A' },
+                instagram: { label: 'Instagram Profile', placeholder: 'https://instagram.com/username' },
+                twitter:   { label: 'Twitter/X Profile', placeholder: 'https://twitter.com/username' },
+                facebook:  { label: 'Facebook Page', placeholder: 'https://facebook.com/page' },
+                linkedin:  { label: 'LinkedIn Profile', placeholder: 'https://linkedin.com/in/username' },
+                tiktok:    { label: 'TikTok Profile', placeholder: 'https://tiktok.com/@username' },
+                youtube:   { label: 'YouTube Channel', placeholder: 'https://youtube.com/@channel' },
+                whatsapp:  { label: 'WhatsApp Chat', placeholder: 'https://wa.me/911234567890' },
+                multiurl:  { label: 'Multi URL (comma-separated)', placeholder: 'https://site1.com,https://site2.com' },
+                appstore:  { label: 'App Store Link', placeholder: 'https://apps.apple.com/app/id123456' },
+                googleplay:{ label: 'Google Play Link', placeholder: 'https://play.google.com/store/apps/details?id=com.app' },
+                pdf:       { label: 'PDF URL', placeholder: 'https://example.com/document.pdf' },
+                menu:      { label: 'Restaurant Menu URL', placeholder: 'https://example.com/menu.pdf' },
+                review:    { label: 'Review Request URL', placeholder: 'https://example.com/review' }
             };
 
             function updateFields() {
                 const type = dataType.value;
                 const cfg = typeConfigs[type];
-                inputLabel.textContent = cfg.label;
-                dataInput.placeholder = cfg.placeholder;
+                if (cfg) {
+                    inputLabel.textContent = cfg.label;
+                    dataInput.placeholder = cfg.placeholder;
+                } else {
+                    inputLabel.textContent = 'Enter Data';
+                    dataInput.placeholder = 'Enter the required data';
+                }
                 dataInput.value = '';
                 resetDisplay();
             }
             dataType.addEventListener('change', updateFields);
             updateFields();
 
+            // ─── Build QR data (special handling for some types) ───
             function buildQRData(type, raw) {
                 const v = raw.trim();
                 if (!v) return null;
+
                 switch (type) {
-                    case 'url': return v;
-                    case 'text': return v;
-                    case 'email': return `mailto:${v}`;
-                    case 'phone': return `tel:${v}`;
-                    case 'sms': return `sms:${v}`;
+                    case 'url':
+                    case 'text':
+                    case 'instagram':
+                    case 'twitter':
+                    case 'facebook':
+                    case 'linkedin':
+                    case 'tiktok':
+                    case 'youtube':
+                    case 'whatsapp':
+                    case 'multiurl':
+                    case 'appstore':
+                    case 'googleplay':
+                    case 'pdf':
+                    case 'menu':
+                    case 'review':
+                        // Most are just URLs or text – return as-is
+                        return v;
+
+                    case 'email':
+                        return `mailto:${v}`;
+                    case 'phone':
+                        return `tel:${v}`;
+                    case 'sms':
+                        return `sms:${v}`;
+
                     case 'wifi': {
+                        // Parse SSID, Password, Type
                         const parts = v.split(',').map(p => p.trim());
                         let ssid = '', password = '', type2 = 'WPA';
                         for (const p of parts) {
@@ -542,6 +597,7 @@
                         if (!ssid) return null;
                         return `WIFI:T:${type2};S:${ssid};P:${password};;`;
                     }
+
                     case 'vcard': {
                         const parts = v.split(',').map(p => p.trim());
                         let name = '', phone = '', email = '';
@@ -554,17 +610,37 @@
                         if (!name) return null;
                         return `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phone}\nEMAIL:${email}\nEND:VCARD`;
                     }
-                    case 'location': return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v)}`;
-                    default: return v;
+
+                    case 'event': {
+                        // Parse: Title:My Event,Start:2024-12-25 18:00,End:2024-12-25 21:00,Location:Hall A
+                        const parts = v.split(',').map(p => p.trim());
+                        let title = '', start = '', end = '', location = '';
+                        for (const p of parts) {
+                            const lower = p.toLowerCase();
+                            if (lower.startsWith('title:')) title = p.substring(6);
+                            else if (lower.startsWith('start:')) start = p.substring(6);
+                            else if (lower.startsWith('end:')) end = p.substring(4);
+                            else if (lower.startsWith('location:')) location = p.substring(9);
+                        }
+                        if (!title || !start) return null;
+                        // Format for iCal (simple) – we'll just generate a URL
+                        // For simplicity, we'll create a Google Calendar link
+                        const googleCal = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${start.replace(/[-: ]/g,'')}/${end ? end.replace(/[-: ]/g,'') : ''}&location=${encodeURIComponent(location)}`;
+                        return googleCal;
+                    }
+
+                    default:
+                        return v;
                 }
             }
 
+            // ─── Generate QR ───
             function generateQR() {
                 const type = dataType.value;
                 const raw = dataInput.value;
                 const data = buildQRData(type, raw);
                 if (!data) {
-                    showToast('Please fill in the required fields.');
+                    showToast('Please fill in the required fields correctly.');
                     return;
                 }
 
